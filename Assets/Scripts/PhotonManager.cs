@@ -12,7 +12,6 @@ public class PhotonManager : MonoBehaviourPun
     public bool isGameStarted = false;
     public bool isRaceStarted = false;
 
-    [SerializeField] private List<PhotonView> photonViews;
 
     private ExitGames.Client.Photon.Hashtable customProperties = new ExitGames.Client.Photon.Hashtable();
 
@@ -21,17 +20,13 @@ public class PhotonManager : MonoBehaviourPun
 
     void Start()
     {
-        Debug.Log("Player list length: " + PhotonNetwork.PlayerList.Length);
-        
-        
-
         if (PhotonNetwork.IsConnected)
         {
             SpawnPlayer();
         }
     }
 
-    [Obsolete]
+    
     void SpawnPlayer()
     {
         if(!isGameStarted)
@@ -46,15 +41,14 @@ public class PhotonManager : MonoBehaviourPun
             }
 
             GameObject Player = PhotonNetwork.Instantiate((playerCount).ToString(), SpawnPoints[playerCount].transform.position, new Quaternion(0f, 0f, 0f, 0f));
-            photonViews.Add(Player.transform.FindChild((playerCount).ToString()).GetComponent<PhotonView>());
-            
+            //Player.GetComponentInChildren<Player_UI>().SetNickName(PhotonNetwork.NickName);
+            Debug.Log("Player: " + Player.name);
         }
     }
 
 
     void CountDownToGameStart()
     {
-        Debug.Log("CountDownToGameStart");
 
         CountdownTimer.OnCountdownTimerHasExpired -= CountDownToGameStart;
 
@@ -73,37 +67,24 @@ public class PhotonManager : MonoBehaviourPun
 
     void StartGame()
     {
-        Debug.Log("Start game");
         isGameStarted = true;
-        foreach (var photonView in photonViews)
+
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
         {
-            if(photonView.CompareTag("Player"))
-            {
-                var player = photonView.gameObject;
-
-                CarMovement car = player.GetComponent<CarMovement>();
-
-                car.MoveToStartPos(SpawnPoints[(int.Parse(player.name))].transform.position, Vector3.zero, true, false);
-            }
+            CarMovement car = player.GetComponent<CarMovement>();
+            car.photonView.RPC("MoveToStartPos_RPC", RpcTarget.All, SpawnPoints[(int.Parse(player.name))].transform.position, Vector3.zero, true, false, 0f);
         }
     }
 
 
     void StartRace()
     {
-        Debug.Log("Start Race");
         isRaceStarted = true;
-        foreach (var photonView in photonViews)
+
+        foreach(GameObject player in GameObject.FindGameObjectsWithTag("Player"))
         {
-            if (photonView.CompareTag("Player"))
-            {
-                var player = photonView.gameObject;
-
-                CarMovement car = player.GetComponent<CarMovement>();
-
-                car.rb.freezeRotation = false;
-                car.canMove = true;
-            }
+            CarMovement car = player.GetComponent<CarMovement>();
+            car.photonView.RPC("PlayerStartRace_RPC", RpcTarget.All, false, true);
         }
     }
 }

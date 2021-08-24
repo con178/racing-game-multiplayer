@@ -54,7 +54,7 @@ public class FinalPoint : MonoBehaviourPun
     {
         if (lapsManager.lapsCompleted[playerNumber] == lapsManager.lapsToFinish)
         {
-            mainText.text = String.Format("{0} wins!", playerNumber);
+            mainText.text = String.Format("{0} wins!", PhotonNetwork.PlayerList.ElementAt(playerNumber).NickName);
         }
     }
 

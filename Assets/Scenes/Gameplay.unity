@@ -760,6 +760,7 @@ MonoBehaviour:
   finalPoint: {fileID: 1005115329}
   checkPointsCompleted: 000000000000000000000000000000000000000000000000
   lapsCompleted: 000000000000000000000000000000000000000000000000
+  lapsToFinish: 2
 --- !u!1 &832644361
 GameObject:
   m_ObjectHideFlags: 0
