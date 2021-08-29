@@ -62,16 +62,20 @@ public class Login : MonoBehaviourPunCallbacks
 
     public void CallLogin()
     {
-        if (username.text.Length > 2)
+        if (username.text.Length > 2 && username.text.Length <= 12)
         {
             PhotonNetwork.NickName = username.text;
             SceneManager.LoadScene("Menu");
         }
-        else
+        else if(username.text.Length <= 2)
         {
             infoText.gameObject.SetActive(true);
             infoText.text = "Type username with more than 2 letters";
         }
-
+        else if(username.text.Length > 12)
+        {
+            infoText.gameObject.SetActive(true);
+            infoText.text = "Type username with no more than 12 letters";
+        }
     }
 }

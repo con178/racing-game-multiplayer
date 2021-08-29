@@ -9,11 +9,13 @@ using Photon.Pun;
 public class FinalPoint : MonoBehaviourPun
 {
     [SerializeField] private LapsManager lapsManager;
-    private bool needToTurn;
     [SerializeField] private PhotonManager photonManager;
-    [SerializeField] private Text mainText;
-    private PhotonView pV;
+    [SerializeField] private Text timerText;
+    [SerializeField] private PositionsUpdate positionsUpdate;
 
+    private bool needToTurn;
+    private PhotonView pV;
+    private float timer = 0f;
 
     void Start()
     {
@@ -30,32 +32,46 @@ public class FinalPoint : MonoBehaviourPun
             if (collision.CompareTag("Player"))
             {
                 playerNumber = collision.gameObject.name;
-
-                if (lapsManager.checkPointsCompleted[int.Parse(playerNumber)] == lapsManager.checkpoints.Length || lapsManager.lapsCompleted[int.Parse(playerNumber)] == 0)
-                {
-                    collision.gameObject.GetComponent<Player_UI>().UpdateInfoText("");
-                    lapsManager.lapsCompleted[int.Parse(playerNumber)]++;
-                    lapsManager.checkPointsCompleted[int.Parse(playerNumber)] = 0;
-
-                    collision.gameObject.GetComponent<Player_UI>().UpdateLapText(lapsManager.lapsCompleted[int.Parse(playerNumber)], lapsManager.lapsToFinish);
-
-                    pV.RPC("CheckIfFinish", RpcTarget.All, int.Parse(playerNumber));
-                }
-                else
-                {
-                    collision.gameObject.GetComponent<Player_UI>().UpdateInfoText("Turn Around");
-                }
+                int viewID = collision.gameObject.GetComponent<PhotonView>().ViewID;
+                pV.RPC("UpdateLapsManagerList", RpcTarget.All, int.Parse(playerNumber), viewID);
             }
         }
     }
 
     [PunRPC]
-    void CheckIfFinish(int playerNumber)
+    void UpdateLapsManagerList(int playerIndex, int player)
     {
-        if (lapsManager.lapsCompleted[playerNumber] == lapsManager.lapsToFinish)
+        if (lapsManager.checkPointsCompleted[playerIndex] == lapsManager.checkpoints.Length || lapsManager.lapsCompleted[playerIndex] == 0)
         {
-            mainText.text = String.Format("{0} wins!", PhotonNetwork.PlayerList.ElementAt(playerNumber).NickName);
+            PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateInfoText("");
+            PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateLapText(lapsManager.lapsCompleted[playerIndex] + 1, lapsManager.lapsToFinish);
+
+            lapsManager.lapsCompleted[playerIndex]++;
+            lapsManager.checkPointsCompleted[playerIndex] = 0;
+
+            positionsUpdate.ChangePositionsList();
+
+            if (lapsManager.lapsCompleted[playerIndex] == lapsManager.lapsToFinish)
+            {
+                PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateInfoText("");
+                PhotonView.Find(player).gameObject.GetComponent<Player_UI>().ClearLapText();
+                string text = String.Format("{0} wins!", PhotonNetwork.PlayerList.ElementAt(playerIndex).NickName);
+                pV.RPC("FinishRaceInfo", RpcTarget.All, playerIndex, text);
+            }
         }
+        else
+        {
+            if (photonManager.isRaceStarted)
+                PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateInfoText("Turn Around");
+        }
+    }
+
+    [PunRPC]
+    void FinishRaceInfo(int playerNumber, string _mainText)
+    {
+        photonManager.RPC_InfoText.text = _mainText;
+        photonManager.isRaceStarted = false;
+        photonManager.InitGame();
     }
 
     /*

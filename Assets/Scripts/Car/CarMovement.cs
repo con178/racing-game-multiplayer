@@ -8,7 +8,7 @@ public class CarMovement : MonoBehaviourPun
 {
     [SerializeField] private GameObject[] PhotonIsNotMine_GameObjectsToRemove;
     [SerializeField] private GameObject[] PhotonIsMine_GameObjectsToRemove;
-
+    [SerializeField] private float carMovementSmoothness = 0.6f;
     [HideInInspector] public Rigidbody2D rb;
     [SerializeField] private float accelerationForce;
     [SerializeField] private float steeringForce;
@@ -57,7 +57,7 @@ public class CarMovement : MonoBehaviourPun
         if(canMove)
         {
             steeringValue = -Input.GetAxis("Horizontal");
-            speed = Mathf.SmoothDamp(speed, (Input.GetAxis("Vertical") * accelerationForce), ref vel, 0.6f);
+            speed = Mathf.SmoothDamp(speed, (Input.GetAxis("Vertical") * accelerationForce), ref vel, carMovementSmoothness);
             speed = Mathf.Clamp(speed, -accelerationForce, accelerationForce);
             direction = Mathf.Sign(Vector2.Dot(rb.velocity, rb.GetRelativeVector(Vector2.up)));
             rb.rotation += steeringValue * steeringForce * rb.velocity.magnitude * direction;
@@ -88,5 +88,11 @@ public class CarMovement : MonoBehaviourPun
     {
         rb.freezeRotation = freezeRot;
         canMove = move;
+    }
+
+
+    private void OnApplicationQuit()
+    {
+        PhotonNetwork.LeaveRoom();
     }
 }

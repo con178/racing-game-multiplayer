@@ -32,6 +32,10 @@ public class Player_UI : MonoBehaviourPun
     {
         lapText.text = "Laps: " + lap + " / " + maxLap;
     }
+    public void ClearLapText()
+    {
+        lapText.text = "";
+    }
 
     public void UpdateInfoText(string _text)
     {

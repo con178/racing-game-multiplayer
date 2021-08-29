@@ -6,12 +6,14 @@ using Photon.Pun;
 public class CarDrift : MonoBehaviourPun
 {
     private CarMovement carMovement;
+    private SoundManager soundManager;
     public TrailRenderer[] trails;
     [HideInInspector] public bool isDrifting;
 
     void Start()
     {
         carMovement = GetComponent<CarMovement>();
+        soundManager = GetComponent<SoundManager>();
     }
     void Update()
     {
@@ -20,11 +22,11 @@ public class CarDrift : MonoBehaviourPun
 
     void Drifting()
     {
-        if (carMovement.steeringValue > 0.9f || carMovement.steeringValue < -0.9f)
+        if (carMovement.steeringValue > 0.9f || carMovement.steeringValue < -0.9f && carMovement.speed > 30f)
         {
             photonView.RPC("DrawDriftingLines", RpcTarget.All, true);
         }
-        else if (isDrifting)
+        else if (carMovement.steeringValue < 0.9f || carMovement.steeringValue > -0.9f)
         {
             photonView.RPC("DrawDriftingLines", RpcTarget.All, false);
         }

@@ -9,12 +9,14 @@ public class CheckPoint : MonoBehaviourPun
 {
     [SerializeField] private LapsManager lapsManager;
     [SerializeField] private int pointNumber;
-    //private int i = 0;
     [SerializeField] private PhotonManager photonManager;
+    [SerializeField] private PositionsUpdate positionsUpdate;
+    private PhotonView pV;
 
     void Start()
     {
         photonManager = (PhotonManager)FindObjectOfType(typeof(PhotonManager));
+        pV = GetComponent<PhotonView>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -26,21 +28,27 @@ public class CheckPoint : MonoBehaviourPun
             {
 
                 playerNumber = collision.gameObject.name;
-
-                
-                if (lapsManager.checkPointsCompleted[int.Parse(playerNumber)] == pointNumber - 1)
-                {
-                    collision.gameObject.GetComponent<Player_UI>().UpdateInfoText("");
-                    lapsManager.checkPointsCompleted[int.Parse(playerNumber)]++;
-                }
-                else
-                {
-                    collision.gameObject.GetComponent<Player_UI>().UpdateInfoText("Turn Around");
-                }
+                int viewID = collision.gameObject.GetComponent<PhotonView>().ViewID;
+                pV.RPC("UpdateLapsManagerList", RpcTarget.All, int.Parse(playerNumber), viewID);
             }
         }
     }
     
+    [PunRPC]
+    private void UpdateLapsManagerList(int playerIndex, int player)
+    {
+        if (lapsManager.checkPointsCompleted[playerIndex] == pointNumber - 1)
+        {
+            PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateInfoText("");
+            lapsManager.checkPointsCompleted[playerIndex]++;
+            positionsUpdate.ChangePositionsList();
+        }
+        else
+        {
+            if(photonManager.isRaceStarted)
+                PhotonView.Find(player).gameObject.GetComponent<Player_UI>().UpdateInfoText("Turn Around");
+        }
+    }
     /*
     IEnumerator SignalText(GameObject go)
     {

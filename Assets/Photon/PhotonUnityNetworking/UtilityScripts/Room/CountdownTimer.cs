@@ -42,8 +42,8 @@ namespace Photon.Pun.UtilityScripts
 
         public const string CountdownStartTime = "StartTime";
 
-        [Header("Countdown time in seconds")] 
-        public float Countdown = 10.0f;
+        //[Header("Countdown time in seconds")]
+        public float Countdown = 5.0f;
 
         public bool isTimerRunning;
 
@@ -58,7 +58,6 @@ namespace Photon.Pun.UtilityScripts
         ///     Called when the timer has expired.
         /// </summary>
         public static event CountdownTimerHasExpired OnCountdownTimerHasExpired;
-
 
         public void Start()
         {

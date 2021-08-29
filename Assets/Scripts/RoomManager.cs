@@ -35,12 +35,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         foreach(RoomInfo room in roomList)
         {
-            GameObject newRoomButton = Instantiate(buttonRoom, contentOfScrollView.transform);
+            if(room.PlayerCount > 0)
+            {
+                GameObject newRoomButton = Instantiate(buttonRoom, contentOfScrollView.transform);
 
-            newRoomButton.transform.Find("RoomNameText").GetComponent<TextMeshProUGUI>().text = room.Name;
-            newRoomButton.transform.Find("NumberOfPlayersText").GetComponent<TextMeshProUGUI>().text = room.PlayerCount + " / " + room.MaxPlayers;
+                newRoomButton.transform.Find("RoomNameText").GetComponent<TextMeshProUGUI>().text = room.Name;
+                newRoomButton.transform.Find("NumberOfPlayersText").GetComponent<TextMeshProUGUI>().text = room.PlayerCount + " / " + room.MaxPlayers;
 
-            newRoomButton.GetComponent<Button>().onClick.AddListener(delegate { JoinRoom(newRoomButton.transform); });
+                newRoomButton.GetComponent<Button>().onClick.AddListener(delegate { JoinRoom(newRoomButton.transform); });
+            }
         }
 
         base.OnRoomListUpdate(roomList);
